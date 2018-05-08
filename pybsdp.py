@@ -139,10 +139,12 @@ def handleImageSelect(ip, dpacket, bpacket):
     # Build the DHCP Ack packet.
     #
     dresponse = dpacket.newAckPacket()
+    dresponse.sname = ip
+    dresponse.bfile = '/nbi/' + bootimage['Path'] + '/i386/booter'
     dresponse.options[dhcp.OPTION_VENDOR_CLASS] = 'AAPLBSDPC'
     dresponse.options[dhcp.OPTION_SERVER_IDENTIFIER] = ip
-    dresponse.options[dhcp.OPTION_TFTP_SERVER_NAME] = ip
-    dresponse.options[dhcp.OPTION_BOOTFILE_NAME] = bootimage['Path'] + '/i386/booter'
+    #dresponse.options[dhcp.OPTION_TFTP_SERVER_NAME] = ip
+    #dresponse.options[dhcp.OPTION_BOOTFILE_NAME] = bootimage['Path'] + '/i386/booter'
     if image['Type'] == 'NFS':
         dresponse.options[dhcp.OPTION_ROOT_PATH] = 'nfs:' + ip + ':' + netbootimagepath + ':' + bootimage['Path'] + '/' + bootimage['RootPath']
     else:
@@ -151,10 +153,10 @@ def handleImageSelect(ip, dpacket, bpacket):
     #
     # Machine name will follow the pattern of: NetBootMAC
     #
-    name = 'NetBoot' + ''.join('{:02x}'.format(c) for c in dpacket.chaddr)
+    #name = 'NetBoot' + ''.join('{:02x}'.format(c) for c in dpacket.chaddr)
     bresponse = bsdp.BsdpPacket()
     bresponse.setType(2)
-    bresponse.setMachineName(name)
+    #bresponse.setMachineName(name)
 
     #
     # If this is not an install image, we need to setup a shadow
@@ -168,7 +170,7 @@ def handleImageSelect(ip, dpacket, bpacket):
 
         bresponse.setShadowMountURL('afp://' + netbootuser + ':' + netbootpass + '@' + ip + '/NetBootClients')
         bresponse.setShadowFilePath(name + '/Shadow')
-        bresponse.setSelectedBootImage(bpacket.getSelectedBootImage())
+    bresponse.setSelectedBootImage(bpacket.getSelectedBootImage())
 
     dresponse.options[dhcp.OPTION_VENDOR_INFORMATION] = bresponse.encode(True)
 
@@ -179,7 +181,7 @@ def handleImageSelect(ip, dpacket, bpacket):
 # Begin main.
 #
 config = ConfigParser.RawConfigParser()
-config.read('/etc/pybsdp.conf')
+config.read('pybsdp.conf')
 netbootimagepath = config.get('pybsdp', 'imagepath')
 netbootclientpath = config.get('pybsdp', 'clientpath')
 netbootuser = config.get('pybsdp', 'netbootuser')

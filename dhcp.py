@@ -159,6 +159,8 @@ class DhcpPacket:
         self.siaddr = '0.0.0.0'
         self.giaddr = '0.0.0.0'
         self.chaddr = [0, 0, 0, 0, 0, 0]
+        self.sname = ''
+        self.bfile = ''
         self.magic = [0x63, 0x82, 0x53, 0x63]
         self.options = { }
 
@@ -179,6 +181,8 @@ class DhcpPacket:
         string += 'siaddr: {:s}\n'.format(self.siaddr)
         string += 'giaddr: {:s}\n'.format(self.giaddr)
         string += 'chaddr: {:s}\n'.format(':'.join('{:02x}'.format(c) for c in self.chaddr))
+        string += 'sname: {:s}\n'.format(self.sname)
+        string += 'file: {:s}\n'.format(self.bfile)
         string += 'magic: {:s}\n'.format(':'.join('{:02x}'.format(c) for c in self.magic))
 
         for opt in self.options:
@@ -233,7 +237,11 @@ class DhcpPacket:
         data += DhcpPacket.encode_value('ip', self.yiaddr)
         data += DhcpPacket.encode_value('ip', self.siaddr)
         data += DhcpPacket.encode_value('ip', self.giaddr)
-        data += DhcpPacket.encode_value('*oct', (self.chaddr + ([0] * (208 - len(self.chaddr)))))
+        data += DhcpPacket.encode_value('*oct', (self.chaddr + ([0] * (16 - len(self.chaddr)))))
+        data += DhcpPacket.encode_value('string', self.sname)
+        data += DhcpPacket.encode_value('*oct', [0] * (64 - len(self.sname)))
+        data += DhcpPacket.encode_value('string', self.bfile)
+        data += DhcpPacket.encode_value('*oct', [0] * (128 - len(self.bfile)))
         data += DhcpPacket.encode_value('*oct', self.magic)
 
         for opt in self.options:
